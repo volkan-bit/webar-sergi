@@ -1,68 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   <title>WebAR Sergi</title>
-  <style>
-    body { margin: 0; overflow: hidden; }
-    canvas { position: absolute; top: 0; left: 0; }
-  </style>
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+    }
+    button {
+      position: absolute;
+      z-index: 10;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      padding: 12px 20px;
+    }
+  </style>
 </head>
 
 <body>
-<script>
-const start = async () => {
 
-  const mindarThree = new window.MINDAR.IMAGE.MindARThree({
-    container: document.body,
-    imageTargetSrc: 'targets.mind',
-  });
+<button id="startAR">AR'yi Başlat</button>
 
-  const { renderer, scene, camera } = mindarThree;
+<script type="module">
+  import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js";
+  import { MindARThree } from "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.module.js";
 
-  // ışık
-  const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-  scene.add(light);
+  const startButton = document.getElementById("startAR");
 
-  // anchor
-  const anchor = mindarThree.addAnchor(0);
+  startButton.addEventListener("click", async () => {
+    startButton.style.display = "none";
 
-  // texture
-  const texture = new THREE.TextureLoader().load('resim1.jpg');
+    const mindarThree = new MindARThree({
+      container: document.body,
+      imageTargetSrc: "targets.mind",
+    });
 
-  const geometry = new THREE.PlaneGeometry(1, 1.4);
-  const material = new THREE.MeshBasicMaterial({ map: texture });
-  const plane = new THREE.Mesh(geometry, material);
+    const { renderer, scene, camera } = mindarThree;
 
-  anchor.group.add(plane);
+    // Işık
+    const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+    scene.add(light);
 
-  // 🔒 KİLİTLEME MEKANİZMASI
-  let locked = false;
+    // Anchor
+    const anchor = mindarThree.addAnchor(0);
 
-  anchor.onTargetFound = () => {
-    if (!locked) {
-      console.log("Marker bulundu – kilitlendi");
+    // Texture
+    const texture = new THREE.TextureLoader().load("resim1.jpg");
+
+    const geometry = new THREE.PlaneGeometry(1, 1.4);
+    const material = new THREE.MeshBasicMaterial({ map: texture });
+    const plane = new THREE.Mesh(geometry, material);
+
+    anchor.group.add(plane);
+
+    // 🔒 Kilitleme mantığı
+    let locked = false;
+
+    anchor.onTargetFound = () => {
       locked = true;
-    }
-  };
+      console.log("Marker bulundu, kilitlendi");
+    };
 
-  anchor.onTargetLost = () => {
-    if (locked) {
-      // hiçbir şey yapma → sahnede kalsın
-    }
-  };
+    anchor.onTargetLost = () => {
+      if (locked) {
+        // bilerek boş → sahnede kalsın
+      }
+    };
 
-  await mindarThree.start();
+    await mindarThree.start();
 
-  renderer.setAnimationLoop(() => {
-    renderer.render(scene, camera);
+    renderer.setAnimationLoop(() => {
+      renderer.render(scene, camera);
+    });
   });
-};
-
-start();
 </script>
+
 </body>
 </html>
