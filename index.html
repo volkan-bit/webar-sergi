@@ -28,7 +28,9 @@
       src="resim1.jpg"
       width="1"
       height="1.4"
-      scale="3 3 3">
+      scale="3 3 3"
+      position="0 0.15 0"
+      visible="false">
     </a-plane>
   </a-entity>
 
@@ -37,35 +39,14 @@
 <script>
 const marker = document.querySelector("#marker");
 const artwork = document.querySelector("#artwork");
-const scene = document.querySelector("a-scene");
-
 let locked = false;
 
 marker.addEventListener("targetFound", () => {
   if (locked) return;
   locked = true;
 
-  const THREE = AFRAME.THREE;
-
-  // Marker dünya pozisyonu
-  const markerWorldPos = new THREE.Vector3();
-  marker.object3D.getWorldPosition(markerWorldPos);
-
-  // Marker dünya rotasyonu
-  const markerWorldQuat = new THREE.Quaternion();
-  marker.object3D.getWorldQuaternion(markerWorldQuat);
-
-  // QR'ın 15cm üstü (duvar yukarısı)
-  const offset = new THREE.Vector3(0, 0.15, 0);
-  offset.applyQuaternion(markerWorldQuat);
-
-  // Artwork'ü sahneye taşı
-  scene.object3D.add(artwork.object3D);
-  artwork.object3D.position.copy(markerWorldPos).add(offset);
-  artwork.object3D.quaternion.copy(markerWorldQuat);
-
-  // Marker takibini kapat
-  marker.setAttribute("mindar-image-target", "enabled", false);
+  // Resmi görünür yap
+  artwork.setAttribute("visible", true);
 });
 </script>
 
