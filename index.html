@@ -14,55 +14,41 @@
 
 <body>
 
-<a-entity id="marker" mindar-image-target="targetIndex: 0">
-  <a-plane
-    id="artwork"
-    src="resim1.jpg"
-    width="1"
-    height="1.4"
-    scale="3 3 3"
-    position="0 0.15 0"
-    visible="false">
-  </a-plane>
-</a-entity>
+<a-scene
+  mindar-image="imageTargetSrc: targets.mind;"
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: true">
+
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+  <!-- QR MARKER -->
+  <a-entity id="marker" mindar-image-target="targetIndex: 0">
+    <a-plane
+      id="artwork"
+      src="resim1.jpg"
+      width="1"
+      height="1.4"
+      scale="3 3 3"
+      position="0 0.15 0"
+      visible="false">
+    </a-plane>
+  </a-entity>
+
+</a-scene>
 
 <script>
 const marker = document.querySelector("#marker");
 const artwork = document.querySelector("#artwork");
-const scene = document.querySelector("a-scene");
 let locked = false;
 
 marker.addEventListener("targetFound", () => {
   if (locked) return;
   locked = true;
 
-  const THREE = AFRAME.THREE;
-
-  // Marker'ın dünya pozisyonunu al
-  const worldPos = new THREE.Vector3();
-  marker.object3D.getWorldPosition(worldPos);
-
-  // Marker'ın dünya rotasyonu
-  const worldQuat = new THREE.Quaternion();
-  marker.object3D.getWorldQuaternion(worldQuat);
-
-  // Marker üstüne offset (10-15 cm)
-  const offset = new THREE.Vector3(0, 0.15, 0);
-  offset.applyQuaternion(worldQuat);
-
-  // Resmi sahneye taşı
-  scene.object3D.add(artwork.object3D);
-  artwork.object3D.position.copy(worldPos).add(offset);
-  artwork.object3D.quaternion.copy(worldQuat);
-
-  // Artık marker takibini kapat
-  marker.setAttribute("mindar-image-target", "enabled", false);
-
   // Resmi görünür yap
   artwork.setAttribute("visible", true);
 });
 </script>
-
 
 </body>
 </html>
