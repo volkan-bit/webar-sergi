@@ -1,39 +1,68 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>WebAR Sergi</title>
+<head>
+  <meta charset="utf-8">
+  <title>WebAR Sergi</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { position: absolute; top: 0; left: 0; }
+  </style>
 
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"></script>
+</head>
 
-    <style>
-      body { margin: 0; overflow: hidden; }
-    </style>
-  </head>
+<body>
+<script>
+const start = async () => {
 
-  <body>
-    <a-scene
-  mindar-image="imageTargetSrc: targets.mind; autoStart: true;"
-  embedded
-  renderer="colorManagement: true;"
-  vr-mode-ui="enabled: false"
-  device-orientation-permission-ui="enabled: true">
+  const mindarThree = new window.MINDAR.IMAGE.MindARThree({
+    container: document.body,
+    imageTargetSrc: 'targets.mind',
+  });
 
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+  const { renderer, scene, camera } = mindarThree;
 
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-plane
-          src="resim1.jpg"
-          width="1"
-          height="1.4"
-          position="0 0 0"
-          rotation="0 0 0">
-        </a-plane>
-      </a-entity>
+  // ışık
+  const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+  scene.add(light);
 
-    </a-scene>
-  </body>
+  // anchor
+  const anchor = mindarThree.addAnchor(0);
+
+  // texture
+  const texture = new THREE.TextureLoader().load('resim1.jpg');
+
+  const geometry = new THREE.PlaneGeometry(1, 1.4);
+  const material = new THREE.MeshBasicMaterial({ map: texture });
+  const plane = new THREE.Mesh(geometry, material);
+
+  anchor.group.add(plane);
+
+  // 🔒 KİLİTLEME MEKANİZMASI
+  let locked = false;
+
+  anchor.onTargetFound = () => {
+    if (!locked) {
+      console.log("Marker bulundu – kilitlendi");
+      locked = true;
+    }
+  };
+
+  anchor.onTargetLost = () => {
+    if (locked) {
+      // hiçbir şey yapma → sahnede kalsın
+    }
+  };
+
+  await mindarThree.start();
+
+  renderer.setAnimationLoop(() => {
+    renderer.render(scene, camera);
+  });
+};
+
+start();
+</script>
+</body>
 </html>
-
-
