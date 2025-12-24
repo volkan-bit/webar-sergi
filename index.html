@@ -21,15 +21,19 @@
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
+  <!-- QR MARKER -->
   <a-entity id="marker" mindar-image-target="targetIndex: 0">
+
+    <!-- TABLO -->
     <a-plane
       id="artwork"
       src="resim1.jpg"
       width="1"
       height="1.4"
       scale="3 3 3"
-      position="0 0 0">
+      position="0 0.15 0">
     </a-plane>
+
   </a-entity>
 
 </a-scene>
@@ -42,17 +46,20 @@ let locked = false;
 
 marker.addEventListener("targetFound", () => {
   if (locked) return;
-
   locked = true;
 
-  // marker'ın world pozisyonunu al
+  // Dünya koordinatını al
   const worldPos = new THREE.Vector3();
   marker.object3D.getWorldPosition(worldPos);
 
-  // artwork'ü sahneye taşı
-  artwork.object3D.position.copy(worldPos);
+  // Resmi QR'ın üstüne sabitle
+  artwork.object3D.position.set(
+    worldPos.x,
+    worldPos.y + 0.15,
+    worldPos.z
+  );
 
-  // marker takibini kapat
+  // Marker takibini kapat
   marker.setAttribute("mindar-image-target", "enabled", false);
 });
 </script>
