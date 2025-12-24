@@ -21,41 +21,17 @@
   AR'yi Başlat
 </button>
 
+
 <script type="module">
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js";
-import { MindARThree } from "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js";
+const btn = document.getElementById("startAR");
 
-const startButton = document.getElementById("startAR");
-
-startButton.addEventListener("click", async () => {
-
-  startButton.style.display = "none";
-
-  const mindarThree = new MindARThree({
-    container: document.body,
-    imageTargetSrc: "./targets.mind"
-  });
-
-  const { renderer, scene, camera } = mindarThree;
-
-  const anchor = mindarThree.addAnchor(0);
-
-  const geometry = new THREE.PlaneGeometry(1, 1);
-  const material = new THREE.MeshBasicMaterial({
-    color: 0xffffff
-  });
-
-  const plane = new THREE.Mesh(geometry, material);
-  anchor.group.add(plane);
-
-  await mindarThree.start();
-
-  renderer.setAnimationLoop(() => {
-    renderer.render(scene, camera);
-  });
-
+btn.addEventListener("click", () => {
+  alert("JS ÇALIŞIYOR ✅");
 });
 </script>
 
+
+
 </body>
 </html>
+
