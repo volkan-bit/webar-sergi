@@ -1,16 +1,98 @@
 <!DOCTYPE html>
-<html>
-<body style="background:black;">
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <title>WebAR Debug</title>
 
-<button id="startAR" style="font-size:20px;">
-TIKLA
-</button>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      color: white;
+      font-family: Arial;
+    }
+    #startAR {
+      position: absolute;
+      z-index: 10;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      padding: 12px 20px;
+    }
+    #log {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      font-size: 14px;
+      background: rgba(0,0,0,0.6);
+      padding: 6px;
+      z-index: 10;
+    }
+  </style>
+</head>
+
+<body>
+
+<button id="startAR">AR'yi Başlat</button>
+<div id="log">Hazır</div>
 
 <script type="module">
-  const btn = document.getElementById("startAR");
-  btn.addEventListener("click", () => {
-    alert("JS ÇALIŞIYOR");
-    btn.style.display = "none";
+  import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js";
+  import { MindARThree } from "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.module.js";
+
+  const log = (msg) => {
+    document.getElementById("log").innerText = msg;
+    console.log(msg);
+  };
+
+  const startButton = document.getElementById("startAR");
+
+  startButton.addEventListener("click", async () => {
+    log("Butona basıldı");
+
+    startButton.style.display = "none";
+
+    try {
+      log("MindAR oluşturuluyor...");
+
+      const mindarThree = new MindARThree({
+        container: document.body,
+        imageTargetSrc: "targets.mind",
+      });
+
+      const { renderer, scene, camera } = mindarThree;
+
+      log("Işık ekleniyor");
+      scene.add(new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1));
+
+      log("Anchor ekleniyor");
+      const anchor = mindarThree.addAnchor(0);
+
+      log("Texture yükleniyor");
+      const texture = new THREE.TextureLoader().load("resim1.jpg");
+
+      const plane = new THREE.Mesh(
+        new THREE.PlaneGeometry(1, 1.4),
+        new THREE.MeshBasicMaterial({ map: texture })
+      );
+
+      anchor.group.add(plane);
+
+      log("MindAR başlatılıyor...");
+      await mindarThree.start();
+
+      log("MindAR BAŞLADI 🎉");
+
+      renderer.setAnimationLoop(() => {
+        renderer.render(scene, camera);
+      });
+
+    } catch (err) {
+      log("HATA: " + err.message);
+      console.error(err);
+    }
   });
 </script>
 
