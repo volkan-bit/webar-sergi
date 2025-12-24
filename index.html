@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WebAR Sergi</title>
 
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
@@ -15,23 +16,26 @@
 <body>
 
 <a-scene
-  mindar-image="imageTargetSrc: targets.mind;"
+  mindar-image="imageTargetSrc: targets.mind; filterMinCF: 0.0001; filterBeta: 0.001; warmupTolerance: 5; missTolerance: 5;"
   vr-mode-ui="enabled: false"
-  device-orientation-permission-ui="enabled: true">
+  device-orientation-permission-ui="enabled: true"
+  renderer="colorManagement: true; physicallyCorrectLights: true;">
 
-  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+  <a-camera position="0 0 0" look-controls="enabled: false" wasd-controls="enabled: false"></a-camera>
 
   <!-- QR MARKER -->
   <a-entity id="marker" mindar-image-target="targetIndex: 0">
-    <a-plane
+    <!-- Sabit pozisyonda tablo - QR kodun 10-15 cm üstünde -->
+    <a-image
       id="artwork"
       src="resim1.jpg"
       width="1"
       height="1.4"
-      scale="3 3 3"
       position="0 0.15 0"
-      visible="false">
-    </a-plane>
+      rotation="0 0 0"
+      visible="false"
+      material="shader: flat; transparent: false; alphaTest: 0.5;">
+    </a-image>
   </a-entity>
 
 </a-scene>
@@ -39,14 +43,73 @@
 <script>
 const marker = document.querySelector("#marker");
 const artwork = document.querySelector("#artwork");
-let locked = false;
+const scene = document.querySelector("a-scene");
 
-marker.addEventListener("targetFound", () => {
-  if (locked) return;
-  locked = true;
+let isLocked = false;
+let lockedPosition = null;
+let lockedRotation = null;
 
-  // Resmi görünür yap
-  artwork.setAttribute("visible", true);
+// Marker bulunduğunda
+marker.addEventListener("targetFound", (event) => {
+  console.log("Marker bulundu!");
+  
+  if (!isLocked) {
+    // İlk bulunduğunda pozisyonu kaydet
+    const markerObj = marker.object3D;
+    lockedPosition = {
+      x: markerObj.position.x,
+      y: markerObj.position.y,
+      z: markerObj.position.z
+    };
+    lockedRotation = {
+      x: markerObj.rotation.x,
+      y: markerObj.rotation.y,
+      z: markerObj.rotation.z
+    };
+    
+    isLocked = true;
+    
+    // Resmi görünür yap
+    artwork.setAttribute("visible", true);
+    
+    // Marker'ı parent'tan ayır ve sahneye ekle (sabit pozisyon için)
+    const worldPos = new THREE.Vector3();
+    const worldRot = new THREE.Euler();
+    const worldScale = new THREE.Vector3();
+    
+    markerObj.getWorldPosition(worldPos);
+    markerObj.getWorldQuaternion(new THREE.Quaternion().setFromEuler(worldRot));
+    markerObj.getWorldScale(worldScale);
+    
+    // Artwork'ü marker'dan ayır
+    const artworkObj = artwork.object3D;
+    const artworkWorldPos = new THREE.Vector3();
+    artworkObj.getWorldPosition(artworkWorldPos);
+    
+    // Artwork'ü doğrudan sahneye ekle
+    setTimeout(() => {
+      scene.object3D.attach(artworkObj);
+      artworkObj.position.copy(artworkWorldPos);
+      
+      // Kamerayı her zaman artwork'e baktır
+      const camera = document.querySelector("a-camera");
+      artworkObj.lookAt(camera.object3D.position);
+      artworkObj.rotation.y += Math.PI; // 180 derece döndür
+    }, 100);
+  }
+});
+
+// Marker kaybolduğunda - opsiyonel, resmi görünür tutmak istiyorsanız bu kısmı kaldırabilirsiniz
+marker.addEventListener("targetLost", (event) => {
+  console.log("Marker kayboldu!");
+  // İsterseniz resmi gizleyebilirsiniz:
+  // artwork.setAttribute("visible", false);
+  // isLocked = false;
+});
+
+// Sahne yüklendiğinde
+scene.addEventListener("loaded", () => {
+  console.log("Sahne yüklendi, kamera hazır");
 });
 </script>
 
