@@ -1,82 +1,16 @@
 <!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="utf-8" />
-  <title>WebAR Sergi</title>
+<html>
+<body style="background:black;">
 
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: #000;
-    }
-    button {
-      position: absolute;
-      z-index: 10;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 18px;
-      padding: 12px 20px;
-    }
-  </style>
-</head>
-
-<body>
-
-<button id="startAR">AR'yi Başlat</button>
+<button id="startAR" style="font-size:20px;">
+TIKLA
+</button>
 
 <script type="module">
-  import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js";
-  import { MindARThree } from "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.module.js";
-
-  const startButton = document.getElementById("startAR");
-
-  startButton.addEventListener("click", async () => {
-    startButton.style.display = "none";
-
-    const mindarThree = new MindARThree({
-      container: document.body,
-      imageTargetSrc: "targets.mind",
-    });
-
-    const { renderer, scene, camera } = mindarThree;
-
-    // Işık
-    const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-    scene.add(light);
-
-    // Anchor
-    const anchor = mindarThree.addAnchor(0);
-
-    // Texture
-    const texture = new THREE.TextureLoader().load("resim1.jpg");
-
-    const geometry = new THREE.PlaneGeometry(1, 1.4);
-    const material = new THREE.MeshBasicMaterial({ map: texture });
-    const plane = new THREE.Mesh(geometry, material);
-
-    anchor.group.add(plane);
-
-    // 🔒 Kilitleme mantığı
-    let locked = false;
-
-    anchor.onTargetFound = () => {
-      locked = true;
-      console.log("Marker bulundu, kilitlendi");
-    };
-
-    anchor.onTargetLost = () => {
-      if (locked) {
-        // bilerek boş → sahnede kalsın
-      }
-    };
-
-    await mindarThree.start();
-
-    renderer.setAnimationLoop(() => {
-      renderer.render(scene, camera);
-    });
+  const btn = document.getElementById("startAR");
+  btn.addEventListener("click", () => {
+    alert("JS ÇALIŞIYOR");
+    btn.style.display = "none";
   });
 </script>
 
